@@ -1,8 +1,8 @@
 {
   "hp": 120,
   "maxHp": 120,
-  "xp": 104,
-  "gold": 50,
+  "xp": 130,
+  "gold": 90,
   "xpReq": 133,
   "level": 4,
   "rivalDmg": 20,
@@ -99,7 +99,7 @@
     }
   ],
   "dailyMissionDate": "2026-01-21",
-  "questsCompletedToday": 9,
+  "questsCompletedToday": 10,
   "skillUsesToday": {},
   "researchQuests": [
     {
@@ -117,11 +117,11 @@
   ],
   "researchStats": {
     "totalResearch": 1,
-    "totalCombat": 5,
+    "totalCombat": 6,
     "researchCompleted": 1,
     "combatCompleted": 0
   },
-  "lastResearchQuestId": 2,
+  "lastResearchQuestId": 4,
   "meditationCyclesCompleted": 0,
   "questDeletionsToday": 0,
   "lastDeletionReset": "",
@@ -148,7 +148,7 @@
   "dayMetrics": [
     {
       "date": "2026-01-21",
-      "questsCompleted": 10,
+      "questsCompleted": 11,
       "questsFailed": 0,
       "xpEarned": 0,
       "goldEarned": 0,

@@ -1468,3 +1468,38 @@ The goal isn't just to reach Level 50. It's to develop the **mindset** of a pers
 Every quest matters. Every skill counts. Every day is an opportunity.
 
 Good luck, and welcome to **SISYPHUS**.
+---
+
+## 🛠️ Technical Architecture (v2.0 Refactor)
+*Added: 2026-01-21*
+
+### Overview
+Version 2.0 moved from a "Monolithic God Class" to a **Modular, Event-Driven Architecture**. This ensures that adding new DLCs/Mechanics does not break the core game loop.
+
+### 1. The Facade Pattern (`engine.ts`)
+The `SisyphusEngine` class in `src/engine.ts` is no longer a worker; it is a **Coordinator**.
+- **Role:** It initializes sub-engines and routes commands to them.
+- **Data Source:** It holds the "Single Source of Truth" (`this.settings`), which is passed by reference to all sub-engines.
+- **Sub-Engines:**
+  - `AnalyticsEngine`: Tracks stats, Boss milestones, and Achievements.
+  - `ChainsEngine`: Handles Quest Chain logic (ordering, locking).
+  - `MeditationEngine`: Manages Lockdown timers and Recovery cost.
+  - `ResearchEngine`: Enforces the 2:1 Combat-to-Research ratio.
+  - `FiltersEngine`: Handles UI filtering logic.
+
+### 2. The Event Bus (`TinyEmitter`)
+We replaced manual polling with a reactive Event Bus system located in `src/utils.ts`.
+- **How it works:** The Engine extends `TinyEmitter`.
+- **Trigger:** When data changes (e.g., `save()`), the Engine calls `this.trigger('update')`.
+- **Listener:** The UI (`view.ts`) subscribes to this event (`this.engine.on('update', ...)`) and refreshes instantly.
+- **Benefit:** Decouples the UI from the logic. The Engine doesn't care if the View is open.
+
+### 3. "Zombie" Logic Removal
+Old hardcoded logic for Research and Chains inside `engine.ts` has been **gutted**. 
+- **Rule:** If you see logic inside `engine.ts` that calculates specific DLC math, **IT IS A BUG**. It should be delegated to the relevant sub-engine (e.g., `this.researchEngine.validateWordCount()`).
+
+### 4. Compiler Upgrade
+- **Target:** ES2017
+- **Reason:** To support `Object.values()` and async/await patterns in sub-engines.
+
+---

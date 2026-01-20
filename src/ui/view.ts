@@ -17,7 +17,10 @@ export class PanopticonView extends ItemView {
     getDisplayText() { return "Eye Sisyphus"; }
     getIcon() { return "skull"; }
 
-    async onOpen() { this.refresh(); }
+    async onOpen() { 
+        this.refresh(); 
+        this.plugin.engine.on('update', this.refresh.bind(this)); 
+    }
 
     async refresh() {
         const c = this.contentEl; c.empty();
@@ -30,9 +33,7 @@ export class PanopticonView extends ItemView {
         if(this.plugin.engine.isLockedDown()) {
             const l = scroll.createDiv({ cls: "sisy-alert sisy-alert-lockdown" });
             l.createEl("h3", { text: "LOCKDOWN ACTIVE" });
-            const timeRemaining = moment(this.plugin.settings.lockdownUntil).diff(moment(), 'minutes');
-            const hours = Math.floor(timeRemaining / 60);
-            const mins = timeRemaining % 60;
+            const { hours, minutes: mins } = this.plugin.engine.meditationEngine.getLockdownTimeRemaining();
             l.createEl("p", { text: `Time Remaining: ${hours}h ${mins}m` });
             const btn = l.createEl("button", { text: "ATTEMPT RECOVERY" });
             
@@ -513,5 +514,9 @@ export class PanopticonView extends ItemView {
         if (cls) b.addClass(cls);
         b.createDiv({ text: label, cls: "sisy-stat-label" });
         b.createDiv({ text: val, cls: "sisy-stat-val" });
+    }
+
+    async onClose() {
+        this.plugin.engine.off('update', this.refresh.bind(this));
     }
 }
