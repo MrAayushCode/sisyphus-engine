@@ -492,3 +492,41 @@ export class QuickCaptureModal extends Modal {
         this.contentEl.empty();
     }
 }
+
+export class ConfirmModal extends Modal {
+    title: string;
+    message: string;
+    onConfirm: () => void;
+
+    constructor(app: App, title: string, message: string, onConfirm: () => void) {
+        super(app);
+        this.title = title;
+        this.message = message;
+        this.onConfirm = onConfirm;
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.createEl("h2", { text: this.title });
+        contentEl.createEl("p", { text: this.message });
+
+        const div = contentEl.createDiv({ cls: "sisy-controls" });
+        div.style.marginTop = "20px";
+        div.style.justifyContent = "flex-end";
+
+        const btnCancel = div.createEl("button", { text: "Cancel" });
+        btnCancel.onclick = () => this.close();
+
+        const btnConfirm = div.createEl("button", { text: "Confirm", cls: "mod-cta" });
+        btnConfirm.style.backgroundColor = "#ff5555"; // Red for danger
+        btnConfirm.style.color = "white";
+        btnConfirm.onclick = () => {
+            this.onConfirm();
+            this.close();
+        };
+    }
+
+    onClose() {
+        this.contentEl.empty();
+    }
+}

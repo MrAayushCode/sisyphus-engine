@@ -2,21 +2,21 @@
   "hp": 105,
   "maxHp": 105,
   "xp": 0,
-  "gold": 0,
+  "gold": 10,
   "xpReq": 100,
   "level": 1,
   "rivalDmg": 10,
-  "lastLogin": "2026-01-22",
+  "lastLogin": "2026-01-23",
   "shieldedUntil": "",
   "restDayUntil": "",
   "skills": [],
   "dailyModifier": {
-    "name": "Rival Sabotage",
-    "desc": "Gold 0.5x.",
-    "xpMult": 1,
-    "goldMult": 0.5,
+    "name": "Adrenaline",
+    "desc": "2x XP, -5 HP/Q.",
+    "xpMult": 2,
+    "goldMult": 1,
     "priceMult": 1,
-    "icon": "🕵️"
+    "icon": "💉"
   },
   "legacy": {
     "souls": 0,
@@ -35,6 +35,34 @@
   "damageTakenToday": 0,
   "dailyMissions": [
     {
+      "id": "specialist",
+      "name": "🎯 Specialist",
+      "desc": "Use the same skill 3 times",
+      "target": 3,
+      "reward": {
+        "xp": 15,
+        "gold": 0
+      },
+      "check": "skill_repeat",
+      "checkFunc": "skill_repeat",
+      "progress": 0,
+      "completed": false
+    },
+    {
+      "id": "synergist",
+      "name": "🔗 Synergist",
+      "desc": "Complete quest with Primary + Secondary skill",
+      "target": 1,
+      "reward": {
+        "xp": 0,
+        "gold": 10
+      },
+      "check": "synergy",
+      "checkFunc": "synergy",
+      "progress": 0,
+      "completed": false
+    },
+    {
       "id": "zero_inbox",
       "name": "🧘 Zero Inbox",
       "desc": "Process all files in 'Scraps'",
@@ -45,39 +73,11 @@
       },
       "check": "zero_inbox",
       "checkFunc": "zero_inbox",
-      "progress": 0,
-      "completed": false
-    },
-    {
-      "id": "morning_win",
-      "name": "☀️ Morning Win",
-      "desc": "Complete 1 Trivial quest before 10 AM",
-      "target": 1,
-      "reward": {
-        "xp": 0,
-        "gold": 15
-      },
-      "check": "morning_trivial",
-      "checkFunc": "morning_trivial",
-      "progress": 0,
-      "completed": false
-    },
-    {
-      "id": "high_stakes",
-      "name": "💪 High Stakes",
-      "desc": "Complete 1 High Stakes quest",
-      "target": 1,
-      "reward": {
-        "xp": 0,
-        "gold": 30
-      },
-      "check": "high_stakes",
-      "checkFunc": "high_stakes",
-      "progress": 0,
-      "completed": false
+      "progress": 1,
+      "completed": true
     }
   ],
-  "dailyMissionDate": "2026-01-22",
+  "dailyMissionDate": "2026-01-23",
   "questsCompletedToday": 0,
   "skillUsesToday": {},
   "researchQuests": [],

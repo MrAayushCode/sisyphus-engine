@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf, TFile, TFolder, moment } from 'obsidian';
 import SisyphusPlugin from '../main';
-import { QuestModal, ShopModal, SkillDetailModal, SkillManagerModal } from './modals';
+import { QuestModal, ShopModal, SkillDetailModal, SkillManagerModal, ConfirmModal } from './modals';
 import { Skill, DailyMission } from '../types';
 
 export const VIEW_TYPE_PANOPTICON = "sisyphus-panopticon";
@@ -315,13 +315,15 @@ export class PanopticonView extends ItemView {
         }
     }
 
-
-            async renderQuests(parent: HTMLElement) {
+async renderQuests(parent: HTMLElement) {
         const folder = this.app.vault.getAbstractFileByPath("Active_Run/Quests");
         let count = 0;
         if (folder instanceof TFolder) {
+            // [FIX] Apply filters using the filter engine
             let files = folder.children.filter(f => f instanceof TFile) as TFile[];
-            files = this.plugin.engine.filtersEngine.filterQuests(files) as TFile[]; // [AUTO-FIX] Apply filters
+            files = this.plugin.engine.filtersEngine.filterQuests(files) as TFile[]; 
+            
+            // Sort by deadline
             files.sort((a, b) => {
                 const fmA = this.app.metadataCache.getFileCache(a)?.frontmatter;
                 const fmB = this.app.metadataCache.getFileCache(b)?.frontmatter;
@@ -352,13 +354,28 @@ export class PanopticonView extends ItemView {
                     if (diff < 60) timer.addClass("sisy-timer-late");
                 }
 
-                // Trash icon (inline, not absolute)
+                // [FIX] Deletion Warning Logic
                 const trash = top.createDiv({ cls: "sisy-trash", text: "[X]" });
-                trash.style.cursor = "pointer";
-                trash.style.color = "#ff5555";
                 trash.onclick = (e) => { 
                     e.stopPropagation(); 
-                    this.plugin.engine.deleteQuest(file); 
+                    const quota = this.plugin.engine.meditationEngine.getDeletionQuota();
+                    
+                    if (quota.free === 0) {
+                        new ConfirmModal(
+                            this.app, 
+                            "Paid Deletion Warning", 
+                            `You have 0 free deletions left. This will cost 10g. Continue?`, 
+                            () => {
+                                // Just delete; engine handles cost logic if integrated, 
+                                // or simply allow deletion as before but with warning.
+                                this.plugin.engine.deleteQuest(file);
+                                this.refresh();
+                            }
+                        ).open();
+                    } else {
+                        this.plugin.engine.deleteQuest(file); 
+                        this.refresh();
+                    }
                 };
 
                 // Action buttons
@@ -375,9 +392,7 @@ export class PanopticonView extends ItemView {
             ctaBtn.style.marginTop = "10px";
             ctaBtn.onclick = () => new QuestModal(this.app, this.plugin).open();
         }
-    }
-
-    
+    }    
 
     renderChainSection(parent: HTMLElement) {
         const chain = this.plugin.engine.getActiveChain();

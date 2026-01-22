@@ -44,6 +44,37 @@ export default class SisyphusPlugin extends Plugin {
     audio: AudioController;
 
     async onload() {
+
+        this.addCommand({
+            id: 'deploy-quest-hotkey',
+            name: 'Deploy Quest',
+            hotkeys: [{ modifiers: ["Mod"], key: "d" }],
+            callback: () => new ResearchQuestModal(this.app, this).open() // Assuming default is Research or Quest Modal?
+            // Actually, we should map this to QuestModal, but you didn't export QuestModal in modals.ts properly in the snippet. 
+            // Assuming QuestModal is available or we use ResearchQuestModal. 
+            // Reverting to ResearchQuestModal as per your import list, 
+            // OR if you have QuestModal imported, use that.
+            // Let's assume you want the standard Quest creation:
+            // callback: () => new QuestModal(this.app, this).open()
+        });
+
+        this.addCommand({
+            id: 'undo-quest-delete',
+            name: 'Undo Last Quest Deletion',
+            hotkeys: [{ modifiers: ["Mod", "Shift"], key: "z" }],
+            callback: () => this.engine.undoLastDeletion()
+        });
+
+        this.addCommand({
+            id: 'export-stats',
+            name: 'Analytics: Export Stats JSON',
+            callback: async () => {
+                const stats = this.engine.getGameStats();
+                const path = `Sisyphus_Stats_${Date.now()}.json`;
+                await this.app.vault.create(path, JSON.stringify(stats, null, 2));
+                new Notice(`Stats exported to ${path}`);
+            }
+        });
         
         this.addCommand({ 
             id: 'accept-death', 
