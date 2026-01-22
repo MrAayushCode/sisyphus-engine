@@ -29,7 +29,7 @@ const BOSS_DATA: Record<number, { name: string, desc: string, hp_pen: number }> 
 const MISSION_POOL = [
     { id: "morning_win", name: "☀️ Morning Win", desc: "Complete 1 Trivial quest before 10 AM", target: 1, reward: { xp: 0, gold: 15 }, check: "morning_trivial" },
     { id: "momentum", name: "🔥 Momentum", desc: "Complete 3 quests today", target: 3, reward: { xp: 20, gold: 0 }, check: "quest_count" },
-    { id: "zero_inbox", name: "🧘 Zero Inbox", desc: "Process all files in 'Scraps'", target: 1, reward: { xp: 0, gold: 10 }, check: "zero_inbox" }, // [FIX] Correct check ID
+    { id: "zero_inbox", name: "🧘 Zero Inbox", desc: "Process all files in 'Scraps'", target: 1, reward: { xp: 0, gold: 10 }, check: "zero_inbox" },
     { id: "specialist", name: "🎯 Specialist", desc: "Use the same skill 3 times", target: 3, reward: { xp: 15, gold: 0 }, check: "skill_repeat" },
     { id: "high_stakes", name: "💪 High Stakes", desc: "Complete 1 High Stakes quest", target: 1, reward: { xp: 0, gold: 30 }, check: "high_stakes" },
     { id: "speed_demon", name: "⚡ Speed Demon", desc: "Complete quest within 2h of creation", target: 1, reward: { xp: 25, gold: 0 }, check: "fast_complete" },
@@ -91,7 +91,6 @@ export class SisyphusEngine extends TinyEmitter {
         this.settings.dailyMissions.forEach(mission => {
             if (mission.completed) return;
             switch (mission.checkFunc) {
-                // [FIX] Zero Inbox Logic
                 case "zero_inbox":
                     const scraps = this.app.vault.getAbstractFileByPath("Scraps");
                     if (scraps instanceof TFolder) {
@@ -121,12 +120,10 @@ export class SisyphusEngine extends TinyEmitter {
                 new Notice(`✅ Mission Complete: ${mission.name}`);
                 this.audio.playSound("success");
 
-                // Check if this was the last one
                 if (this.settings.dailyMissions.every(m => m.completed)) justFinishedAll = true;
             }
         });
 
-        // [FIX] Award Bonus Gold
         if (justFinishedAll) {
             this.settings.gold += 50;
             new Notice("🎉 All Missions Complete! +50 Bonus Gold");
@@ -183,10 +180,19 @@ export class SisyphusEngine extends TinyEmitter {
         if (!fm) return;
         const questName = file.basename;
         
+        // [FIX] Quest Chain Integration
         if (this.chainsEngine.isQuestInChain(questName)) {
              const canStart = this.chainsEngine.canStartQuest(questName);
              if (!canStart) { new Notice("Locked by Chain."); return; }
-             await this.chainsEngine.completeChainQuest(questName);
+             
+             const chainResult = await this.chainsEngine.completeChainQuest(questName);
+             if (chainResult.success) {
+                 new Notice(chainResult.message);
+                 if (chainResult.chainComplete) {
+                     this.settings.xp += chainResult.bonusXp;
+                     new Notice(`🎉 Chain Bonus: +${chainResult.bonusXp} XP!`);
+                 }
+             }
         }
 
         if (fm.is_boss) {
@@ -228,7 +234,6 @@ export class SisyphusEngine extends TinyEmitter {
 
         this.settings.xp += xp; this.settings.gold += gold;
         
-        // [FIX] Adrenaline self-damage counting toward lockdown
         if (this.settings.dailyModifier.name === "Adrenaline") {
             this.settings.hp -= 5;
             this.settings.damageTakenToday += 5;
@@ -273,19 +278,67 @@ export class SisyphusEngine extends TinyEmitter {
         await this.save();
     }
 
-    async spawnBoss(level: number) {
+
+  async spawnBoss(level: number) {
         const boss = BOSS_DATA[level];
         if (!boss) return;
         this.audio.playSound("heartbeat");
         new Notice("⚠️ ANOMALY DETECTED...", 2000);
+        
         setTimeout(async () => {
             this.audio.playSound("death");
             new Notice(`☠️ BOSS SPAWNED: ${boss.name}`);
+            
+            // 1. Create the quest file
             await this.createQuest(
                 `BOSS_LVL${level} - ${boss.name}`, 5, "Boss", "None", 
                 moment().add(3, 'days').toISOString(), true, "Critical", true
             );
+
+            // 2. Inject HP into frontmatter (Delayed)
+            setTimeout(async () => {
+                const safeName = `BOSS_LVL${level}_-_${boss.name}`.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                // Try to find the file we just created
+                const files = this.app.vault.getMarkdownFiles();
+                const file = files.find(f => f.name.toLowerCase() === `${safeName}.md`);
+                
+                if (file instanceof TFile) {
+                    const maxHp = 100 + (level * 20); 
+                    await this.app.fileManager.processFrontMatter(file, (fm) => {
+                        fm.boss_hp = maxHp;
+                        fm.boss_max_hp = maxHp;
+                    });
+                    // Force UI Refresh after data is definitely saved
+                    this.trigger("update"); 
+                }
+            }, 500); 
         }, 3000);
+    }
+
+
+
+  async damageBoss(file: TFile) {
+        const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
+        if (!fm || !fm.is_boss) return;
+
+        const damage = 25; 
+        const currentHp = fm.boss_hp || 100;
+        const newHp = currentHp - damage;
+
+        if (newHp <= 0) {
+            await this.completeQuest(file);
+            new Notice("⚔️ FINAL BLOW! Boss Defeated!");
+        } else {
+            // Apply damage
+            await this.app.fileManager.processFrontMatter(file, (f) => {
+                f.boss_hp = newHp;
+            });
+            this.audio.playSound("fail");
+            new Notice(`⚔️ Boss Damaged! ${newHp}/${fm.boss_max_hp} HP remaining`);
+            
+            // Force UI refresh slightly after to show new HP bar
+            setTimeout(() => this.trigger("update"), 200); 
+        }
     }
 
     async failQuest(file: TFile, manualAbort: boolean = false) {
@@ -294,7 +347,6 @@ export class SisyphusEngine extends TinyEmitter {
 
         let damage = 10 + Math.floor(this.settings.rivalDmg / 2);
         
-        // [FIX] Apply Boss Penalty
         const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
         if (fm?.is_boss) {
             const match = file.basename.match(/BOSS_LVL(\d+)/);
@@ -366,8 +418,16 @@ deadline: ${deadlineIso}
         this.save();
     }
     
-    // [FEATURE] Undo Deletion System
+    // [FIX] Apply Deletion Cost
     async deleteQuest(file: TFile) { 
+        // Check deletion quota and apply cost
+        const costResult = this.meditationEngine.applyDeletionCost();
+        
+        if (costResult.cost > 0 && this.settings.gold < costResult.cost) {
+            new Notice("Insufficient gold for paid deletion!");
+            return;
+        }
+        
         // Read and buffer for undo
         try {
             const content = await this.app.vault.read(file);
@@ -381,7 +441,8 @@ deadline: ${deadlineIso}
             if (this.deletedQuestBuffer.length > 5) this.deletedQuestBuffer.shift();
         } catch(e) { console.error("Buffer fail", e); }
 
-        await this.app.vault.delete(file); 
+        await this.app.vault.delete(file);
+        if (costResult.message) new Notice(costResult.message);
         this.save(); 
     }
 
@@ -389,7 +450,6 @@ deadline: ${deadlineIso}
         const last = this.deletedQuestBuffer.pop();
         if (!last) { new Notice("Nothing to undo."); return; }
         
-        // Prevent undoing if > 60 seconds (optional, but good for anti-cheese)
         if (Date.now() - last.deletedAt > 60000) { new Notice("Too late to undo."); return; }
 
         try {
@@ -404,12 +464,10 @@ deadline: ${deadlineIso}
         const folder = this.app.vault.getAbstractFileByPath("Active_Run/Quests");
         if (!(folder instanceof TFolder)) return;
         
-        // [FIX] Constant Zero Inbox Check
         const zeroInbox = this.settings.dailyMissions.find(m => m.checkFunc === "zero_inbox" && !m.completed);
         if (zeroInbox) {
             const scraps = this.app.vault.getAbstractFileByPath("Scraps");
             if (scraps instanceof TFolder && scraps.children.length === 0) {
-                // Complete mission via standard check to trigger rewards
                 this.checkDailyMissions({ type: "check" });
             }
         }
@@ -466,7 +524,7 @@ deadline: ${deadlineIso}
         new Notice("⚡ Scrap Captured"); this.audio.playSound("click");
     }
     
-    async generateSkillGraph() { /* Existing Canvas Logic */ 
+    async generateSkillGraph() { 
         const skills = this.settings.skills;
         if (skills.length === 0) { new Notice("No neural nodes found."); return; }
         const nodes: any[] = []; const edges: any[] = [];
@@ -535,7 +593,6 @@ deadline: ${deadlineIso}
     }
 
     async triggerDeath() { 
-        // [FIX] Archive active files to Graveyard
         const activeFolder = this.app.vault.getAbstractFileByPath("Active_Run/Quests");
         const graveFolder = "Graveyard/Deaths/" + moment().format("YYYY-MM-DD-HHmm");
         if (!this.app.vault.getAbstractFileByPath(graveFolder)) await this.app.vault.createFolder(graveFolder);

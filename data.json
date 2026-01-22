@@ -2,7 +2,7 @@
   "hp": 105,
   "maxHp": 105,
   "xp": 0,
-  "gold": 10,
+  "gold": 0,
   "xpReq": 100,
   "level": 1,
   "rivalDmg": 10,
@@ -11,12 +11,12 @@
   "restDayUntil": "",
   "skills": [],
   "dailyModifier": {
-    "name": "Adrenaline",
-    "desc": "2x XP, -5 HP/Q.",
-    "xpMult": 2,
-    "goldMult": 1,
+    "name": "Rival Sabotage",
+    "desc": "Gold 0.5x.",
+    "xpMult": 1,
+    "goldMult": 0.5,
     "priceMult": 1,
-    "icon": "💉"
+    "icon": "🕵️"
   },
   "legacy": {
     "souls": 0,
@@ -35,6 +35,34 @@
   "damageTakenToday": 0,
   "dailyMissions": [
     {
+      "id": "momentum",
+      "name": "🔥 Momentum",
+      "desc": "Complete 3 quests today",
+      "target": 3,
+      "reward": {
+        "xp": 20,
+        "gold": 0
+      },
+      "check": "quest_count",
+      "checkFunc": "quest_count",
+      "progress": 0,
+      "completed": false
+    },
+    {
+      "id": "morning_win",
+      "name": "☀️ Morning Win",
+      "desc": "Complete 1 Trivial quest before 10 AM",
+      "target": 1,
+      "reward": {
+        "xp": 0,
+        "gold": 15
+      },
+      "check": "morning_trivial",
+      "checkFunc": "morning_trivial",
+      "progress": 0,
+      "completed": false
+    },
+    {
       "id": "specialist",
       "name": "🎯 Specialist",
       "desc": "Use the same skill 3 times",
@@ -47,34 +75,6 @@
       "checkFunc": "skill_repeat",
       "progress": 0,
       "completed": false
-    },
-    {
-      "id": "synergist",
-      "name": "🔗 Synergist",
-      "desc": "Complete quest with Primary + Secondary skill",
-      "target": 1,
-      "reward": {
-        "xp": 0,
-        "gold": 10
-      },
-      "check": "synergy",
-      "checkFunc": "synergy",
-      "progress": 0,
-      "completed": false
-    },
-    {
-      "id": "zero_inbox",
-      "name": "🧘 Zero Inbox",
-      "desc": "Process all files in 'Scraps'",
-      "target": 1,
-      "reward": {
-        "xp": 0,
-        "gold": 10
-      },
-      "check": "zero_inbox",
-      "checkFunc": "zero_inbox",
-      "progress": 1,
-      "completed": true
     }
   ],
   "dailyMissionDate": "2026-01-23",
@@ -89,8 +89,8 @@
   },
   "lastResearchQuestId": 0,
   "meditationCyclesCompleted": 0,
-  "questDeletionsToday": 0,
-  "lastDeletionReset": "",
+  "questDeletionsToday": 1,
+  "lastDeletionReset": "2026-01-23",
   "isMeditating": false,
   "meditationClicksThisLockdown": 0,
   "activeChains": [],
@@ -111,6 +111,77 @@
     "longest": 0,
     "lastDate": ""
   },
-  "achievements": [],
+  "achievements": [
+    {
+      "id": "first_blood",
+      "name": "First Blood",
+      "description": "Complete your first quest.",
+      "rarity": "common",
+      "unlocked": false
+    },
+    {
+      "id": "week_warrior",
+      "name": "Week Warrior",
+      "description": "Maintain a 7-day streak.",
+      "rarity": "common",
+      "unlocked": false
+    },
+    {
+      "id": "warm_up",
+      "name": "Warm Up",
+      "description": "Complete 10 total quests.",
+      "rarity": "common",
+      "unlocked": false
+    },
+    {
+      "id": "skill_adept",
+      "name": "Apprentice",
+      "description": "Reach Level 5 in any skill.",
+      "rarity": "rare",
+      "unlocked": false
+    },
+    {
+      "id": "chain_gang",
+      "name": "Chain Gang",
+      "description": "Complete a Quest Chain.",
+      "rarity": "rare",
+      "unlocked": false
+    },
+    {
+      "id": "researcher",
+      "name": "Scholar",
+      "description": "Complete 5 Research Quests.",
+      "rarity": "rare",
+      "unlocked": false
+    },
+    {
+      "id": "rich",
+      "name": "Capitalist",
+      "description": "Hold 500 gold at once.",
+      "rarity": "rare",
+      "unlocked": false
+    },
+    {
+      "id": "boss_slayer",
+      "name": "Giant Slayer",
+      "description": "Defeat your first Boss.",
+      "rarity": "epic",
+      "unlocked": false
+    },
+    {
+      "id": "ascended",
+      "name": "Sisyphus Happy",
+      "description": "Reach Level 50.",
+      "rarity": "legendary",
+      "unlocked": false
+    },
+    {
+      "id": "immortal",
+      "name": "Immortal",
+      "description": "Reach Level 20 with 0 Deaths.",
+      "rarity": "legendary",
+      "unlocked": false
+    }
+  ],
   "gameWon": false
 }

@@ -3,7 +3,7 @@ import { SisyphusSettings } from './types';
 import { SisyphusEngine, DEFAULT_MODIFIER } from './engine';
 import { AudioController } from './utils';
 import { PanopticonView, VIEW_TYPE_PANOPTICON } from "./ui/view";
-import { ResearchQuestModal, ChainBuilderModal, ResearchListModal, QuickCaptureModal } from "./ui/modals";
+import { ResearchQuestModal, ChainBuilderModal, ResearchListModal, QuickCaptureModal, QuestTemplateModal } from "./ui/modals";
 
 const DEFAULT_SETTINGS: SisyphusSettings = {
     hp: 100, maxHp: 100, xp: 0, gold: 0, xpReq: 100, level: 1, rivalDmg: 10,
@@ -44,6 +44,12 @@ export default class SisyphusPlugin extends Plugin {
     audio: AudioController;
 
     async onload() {
+
+    this.addCommand({
+            id: 'quest-templates',
+            name: 'Deploy Quest from Template',
+            callback: () => new QuestTemplateModal(this.app, this).open()
+        });
 
         this.addCommand({
             id: 'deploy-quest-hotkey',

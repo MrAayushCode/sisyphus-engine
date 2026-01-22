@@ -27,15 +27,31 @@ export class PanopticonView extends ItemView {
         const container = c.createDiv({ cls: "sisy-container" });
         const scroll = container.createDiv({ cls: "sisy-scroll-area" });
 
-        // --- 1. HEADER & CRITICAL ALERTS ---
-        scroll.createEl("h2", { text: "Eye SISYPHUS OS", cls: "sisy-header" });
+        // --- 1. HEADER & SOUND TOGGLE ---
+        const header = scroll.createDiv({ cls: "sisy-header" });
+        header.style.display = "flex";
+        header.style.justifyContent = "space-between";
+        header.style.alignItems = "center";
+        
+        header.createSpan({ text: "Eye SISYPHUS OS" });
+        
+        const soundBtn = header.createEl("span", { text: this.plugin.settings.muted ? "🔇" : "🔊" });
+        soundBtn.style.cursor = "pointer";
+        soundBtn.style.fontSize = "0.8em";
+        soundBtn.title = "Toggle Sound";
+        soundBtn.onclick = async () => {
+             this.plugin.settings.muted = !this.plugin.settings.muted;
+             this.plugin.audio.setMuted(this.plugin.settings.muted);
+             await this.plugin.saveSettings();
+             this.refresh();
+        };
+
        // [NEW] DEBT WARNING
         if (this.plugin.settings.gold < 0) {
             const d = scroll.createDiv({ cls: "sisy-alert sisy-alert-debt" });
             d.createEl("h3", { text: "⚠️ DEBT CRISIS ACTIVE" });
             d.createEl("p", { text: "ALL DAMAGE RECEIVED IS DOUBLED." });
             
-            // [FIXED] style moved to attr
             d.createEl("p", { 
                 text: `Current Balance: ${this.plugin.settings.gold}g`, 
                 attr: { style: "font-weight:bold" } 
@@ -377,13 +393,46 @@ async renderQuests(parent: HTMLElement) {
                         this.refresh();
                     }
                 };
-
-                // Action buttons
+// [MODIFIED] Boss HP Bar
+                if (fm?.is_boss && fm?.boss_max_hp) {
+                    const hpBar = card.createDiv();
+                    hpBar.setAttribute("style", "height: 8px; background: #333; margin: 8px 0; border-radius: 4px; overflow: hidden; border: 1px solid #555;");
+                    
+                    const hpPercent = (fm.boss_hp / fm.boss_max_hp) * 100;
+                    const hpFill = hpBar.createDiv();
+                    hpFill.setAttribute("style", `width: ${hpPercent}%; height: 100%; background: #ff5555; transition: width 0.3s;`);
+                    
+                    // [FIXED LINE BELOW] style is now inside attr
+                    card.createDiv({ 
+                        text: `${fm.boss_hp}/${fm.boss_max_hp} HP`, 
+                        attr: { style: "font-size: 0.8em; text-align: center; color: #ff5555; margin-bottom: 5px;" } 
+                    });
+                }
+        // Action buttons
                 const acts = card.createDiv({ cls: "sisy-actions" });
-                const bD = acts.createEl("button", { text: "OK", cls: "sisy-action-btn mod-done" });
-                bD.onclick = () => this.plugin.engine.completeQuest(file);
+                
+                // If it's a boss, show ATTACK button instead of OK
+                if (fm?.is_boss) {
+                    const bAttack = acts.createEl("button", { text: "⚔️ ATTACK", cls: "sisy-action-btn" });
+                    bAttack.setAttribute("style", "border-color: #ff5555; color: #ff5555; background: rgba(255, 85, 85, 0.1); font-weight: bold;");
+                    bAttack.onclick = (e) => {
+                        e.stopPropagation();
+                        this.plugin.engine.damageBoss(file);
+                    };
+                } else {
+                    // Standard Quest Button
+                    const bD = acts.createEl("button", { text: "OK", cls: "sisy-action-btn mod-done" });
+                    bD.onclick = (e) => {
+                        e.stopPropagation();
+                        this.plugin.engine.completeQuest(file);
+                    };
+                }
+
                 const bF = acts.createEl("button", { text: "XX", cls: "sisy-action-btn mod-fail" });
-                bF.onclick = () => this.plugin.engine.failQuest(file, true);
+                bF.onclick = (e) => {
+                    e.stopPropagation();
+                    this.plugin.engine.failQuest(file, true);
+                };
             }
         }
         if (count === 0) {
@@ -516,6 +565,24 @@ async renderQuests(parent: HTMLElement) {
             statBox.createEl("p", { text: String(item.value) }).setAttribute("style", "margin: 5px 0 0 0; font-size: 1.2em; font-weight: bold; color: #ffc107;");
         });
         
+        // [NEW] Achievements Section
+        analyticsDiv.createEl("h4", { text: "Achievements" }).setAttribute("style", "margin: 12px 0 8px 0; color: #ffc107;");
+        const achList = analyticsDiv.createDiv({ cls: "sisy-achievement-list" });
+        
+        const achievements = this.plugin.settings.achievements || [];
+        if (achievements.length === 0) {
+            // Force init if empty
+            this.plugin.engine.analyticsEngine.initializeAchievements();
+        }
+
+        achievements.forEach(ach => {
+            const badge = achList.createSpan({ cls: `sisy-achievement sisy-achievement-${ach.rarity}` });
+            if (!ach.unlocked) badge.addClass("sisy-achievement-locked");
+            
+            badge.setText(ach.unlocked ? ach.name : "???");
+            badge.setAttribute("title", ach.unlocked ? ach.description : "Locked Achievement");
+        });
+
         // Boss progress
         analyticsDiv.createEl("h4", { text: "Boss Milestones" }).setAttribute("style", "margin: 12px 0 8px 0; color: #ffc107;");
         
@@ -538,6 +605,7 @@ async renderQuests(parent: HTMLElement) {
             winDiv.createEl("p", { text: "GAME WON!" }).setAttribute("style", "margin: 0; font-size: 1.2em; font-weight: bold; color: #4caf50;");
         }
     }
+
     stat(p: HTMLElement, label: string, val: string, cls: string = "") {
         const b = p.createDiv({ cls: "sisy-stat-box" }); 
         if (cls) b.addClass(cls);

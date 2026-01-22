@@ -530,3 +530,67 @@ export class ConfirmModal extends Modal {
         this.contentEl.empty();
     }
 }
+
+// [APPEND TO src/ui/modals.ts]
+
+export class QuestTemplateModal extends Modal {
+    plugin: SisyphusPlugin;
+    // Hardcoded templates for now - v2.0 could allow user-customizable ones
+    templates = [
+        { name: "Morning Routine", diff: 1, skill: "Discipline", deadline: "10:00 AM" },
+        { name: "Deep Work Block", diff: 3, skill: "Focus", deadline: "+2h" },
+        { name: "Exercise", diff: 2, skill: "Health", deadline: "+12h" },
+        { name: "Code Review", diff: 2, skill: "Engineering", deadline: "+4h" }
+    ];
+    
+    constructor(app: App, plugin: SisyphusPlugin) {
+        super(app);
+        this.plugin = plugin;
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.createEl("h2", { text: "⚡ Quick Deploy Templates" });
+        
+        const grid = contentEl.createDiv();
+        grid.style.display = "grid";
+        grid.style.gridTemplateColumns = "1fr 1fr";
+        grid.style.gap = "10px";
+
+        this.templates.forEach(template => {
+            const btn = grid.createEl("button", { text: template.name });
+            btn.addClass("sisy-btn");
+            btn.style.textAlign = "left";
+            btn.style.padding = "15px";
+            
+            // Subtext
+            btn.createDiv({ 
+                text: `Diff: ${template.diff} | Skill: ${template.skill}`, 
+                attr: { style: "font-size: 0.8em; opacity: 0.7; margin-top: 5px;" }
+            });
+
+            btn.onclick = () => {
+                const deadline = template.deadline.startsWith("+") 
+                    ? moment().add(parseInt(template.deadline), 'hours').toISOString()
+                    : moment().set({ hour: 10, minute: 0 }).toISOString();
+                    
+                this.plugin.engine.createQuest(
+                    template.name, 
+                    template.diff, 
+                    template.skill, 
+                    "None", 
+                    deadline, 
+                    false, 
+                    "Normal", 
+                    false
+                );
+                new Notice(`Deployed: ${template.name}`);
+                this.close();
+            };
+        });
+    }
+
+    onClose() {
+        this.contentEl.empty();
+    }
+}
