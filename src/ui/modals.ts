@@ -441,3 +441,54 @@ export class VictoryModal extends Modal {
         this.contentEl.empty();
     }
 }
+
+
+
+// [APPEND TO src/ui/modals.ts]
+
+export class QuickCaptureModal extends Modal {
+    plugin: SisyphusPlugin;
+    
+    constructor(app: App, plugin: SisyphusPlugin) {
+        super(app);
+        this.plugin = plugin;
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.createEl("h2", { text: "⚡ Quick Capture" });
+
+        const div = contentEl.createDiv();
+        const input = div.createEl("input", { 
+            type: "text", 
+            attr: { 
+                placeholder: "What's on your mind?",
+                style: "width: 100%; padding: 10px; font-size: 1.2em; background: #222; border: 1px solid #444; color: #e0e0e0;"
+            } 
+        });
+
+        input.focus();
+
+        // Handle Enter Key
+        input.addEventListener("keypress", async (e) => {
+            if (e.key === "Enter" && input.value.trim().length > 0) {
+                await this.plugin.engine.createScrap(input.value);
+                this.close();
+            }
+        });
+
+        const btn = contentEl.createEl("button", { text: "Capture to Scraps" });
+        btn.addClass("mod-cta");
+        btn.setAttribute("style", "margin-top: 15px; width: 100%;");
+        btn.onclick = async () => {
+            if (input.value.trim().length > 0) {
+                await this.plugin.engine.createScrap(input.value);
+                this.close();
+            }
+        };
+    }
+
+    onClose() {
+        this.contentEl.empty();
+    }
+}

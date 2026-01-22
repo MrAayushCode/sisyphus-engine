@@ -406,6 +406,113 @@ deadline: ${deadlineIso}
     getActiveChain() { return this.chainsEngine.getActiveChain(); }
     getChainProgress() { return this.chainsEngine.getChainProgress(); }
     async breakChain() { await this.chainsEngine.breakChain(); await this.save(); }
+
+    async createScrap(content: string) {
+        const folderPath = "Scraps";
+        
+        // Ensure folder exists
+        if (!this.app.vault.getAbstractFileByPath(folderPath)) {
+            await this.app.vault.createFolder(folderPath);
+        }
+
+        // Generate filename: YYYY-MM-DD HH-mm-ss
+        const timestamp = moment().format("YYYY-MM-DD HH-mm-ss");
+        const filename = `${folderPath}/${timestamp}.md`;
+        
+        // Create file
+        await this.app.vault.create(filename, content);
+        
+        new Notice("⚡ Scrap Captured");
+        this.audio.playSound("click");
+    }
+    async generateSkillGraph() {
+        const skills = this.settings.skills;
+        if (skills.length === 0) {
+            new Notice("No neural nodes found. Create skills first!");
+            return;
+        }
+
+        const nodes: any[] = [];
+        const edges: any[] = [];
+        const width = 250;
+        const height = 140; // Increased height for stats
+        const radius = Math.max(400, skills.length * 60); // Dynamic radius prevents overlap
+        const centerX = 0;
+        const centerY = 0;
+        const angleStep = (2 * Math.PI) / skills.length;
+
+        // 1. Create Nodes
+        skills.forEach((skill, index) => {
+            const angle = index * angleStep;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+
+            // Determine Color based on status
+            // 1=Red (Rusty), 4=Green (Healthy), 6=Purple (Mastered > Lv10)
+            let color = "4"; 
+            if (skill.rust > 0) color = "1";
+            else if (skill.level >= 10) color = "6";
+
+            // Status Text
+            const statusIcon = skill.rust > 0 ? "⚠️ RUSTY" : "🟢 ACTIVE";
+            const progress = Math.floor((skill.xp / skill.xpReq) * 100);
+            
+            // Markdown Content
+            const text = `## ${skill.name}
+**Lv ${skill.level}**
+${statusIcon}
+XP: ${skill.xp}/${skill.xpReq} (${progress}%)
+[Polish Node]`; 
+
+            nodes.push({
+                id: skill.name,
+                x: Math.floor(x),
+                y: Math.floor(y),
+                width: width,
+                height: height,
+                type: "text",
+                text: text,
+                color: color
+            });
+        });
+
+        // 2. Create Edges (Synergies)
+        skills.forEach(skill => {
+            if (skill.connections) {
+                skill.connections.forEach(targetName => {
+                    // Only create edge if target exists to avoid broken links
+                    if (skills.find(s => s.name === targetName)) {
+                        edges.push({
+                            id: `${skill.name}-${targetName}`,
+                            fromNode: skill.name,
+                            fromSide: "right",
+                            toNode: targetName,
+                            toSide: "left",
+                            color: "4" // Green connection
+                        });
+                    }
+                });
+            }
+        });
+
+        // 3. Construct Canvas JSON
+        const canvasData = {
+            nodes: nodes,
+            edges: edges
+        };
+
+        // 4. Save to File
+        const path = "Active_Run/Neural_Hub.canvas";
+        const file = this.app.vault.getAbstractFileByPath(path);
+        
+        if (file instanceof TFile) {
+            await this.app.vault.modify(file, JSON.stringify(canvasData, null, 2));
+            new Notice("Neural Hub updated.");
+        } else {
+            await this.app.vault.create(path, JSON.stringify(canvasData, null, 2));
+            new Notice("Neural Hub created.");
+        }
+    }
     
     setFilterState(energy: any, context: any, tags: string[]) { this.filtersEngine.setFilterState(energy, context, tags); this.save(); }
     clearFilters() { this.filtersEngine.clearFilters(); this.save(); }

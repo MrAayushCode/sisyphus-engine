@@ -2,8 +2,8 @@ import { Notice, Plugin, TFile, WorkspaceLeaf, debounce } from 'obsidian';
 import { SisyphusSettings } from './types';
 import { SisyphusEngine, DEFAULT_MODIFIER } from './engine';
 import { AudioController } from './utils';
-import { ResearchQuestModal, ChainBuilderModal, ResearchListModal } from "./ui/modals";
 import { PanopticonView, VIEW_TYPE_PANOPTICON } from "./ui/view";
+import { ResearchQuestModal, ChainBuilderModal, ResearchListModal, QuickCaptureModal } from "./ui/modals";
 
 const DEFAULT_SETTINGS: SisyphusSettings = {
     hp: 100, maxHp: 100, xp: 0, gold: 0, xpReq: 100, level: 1, rivalDmg: 10,
@@ -44,6 +44,29 @@ export default class SisyphusPlugin extends Plugin {
     audio: AudioController;
 
     async onload() {
+        
+        this.addCommand({ 
+            id: 'accept-death', 
+            name: 'ACCEPT DEATH (Reset Run)', 
+            callback: () => this.engine.triggerDeath() 
+        });
+
+        this.addCommand({ 
+            id: 'reroll-chaos', 
+            name: 'Reroll Chaos', 
+            callback: () => this.engine.rollChaos(true) 
+        });
+        this.addCommand({
+            id: 'quick-capture',
+            name: 'Quick Capture (Scrap)',
+            callback: () => new QuickCaptureModal(this.app, this).open()
+        });
+        
+        this.addCommand({
+            id: 'generate-skill-graph',
+            name: 'Neural Hub: Generate Skill Graph',
+            callback: () => this.engine.generateSkillGraph()
+        });
         await this.loadSettings();
         
         this.loadStyles();

@@ -11,12 +11,12 @@
   "restDayUntil": "",
   "skills": [],
   "dailyModifier": {
-    "name": "Clear Skies",
-    "desc": "No effects.",
+    "name": "Rival Sabotage",
+    "desc": "Gold 0.5x.",
     "xpMult": 1,
-    "goldMult": 1,
+    "goldMult": 0.5,
     "priceMult": 1,
-    "icon": "☀️"
+    "icon": "🕵️"
   },
   "legacy": {
     "souls": 0,
@@ -35,44 +35,44 @@
   "damageTakenToday": 0,
   "dailyMissions": [
     {
-      "id": "speed_demon",
-      "name": "⚡ Speed Demon",
-      "desc": "Complete quest within 2h of creation",
-      "target": 1,
-      "reward": {
-        "xp": 25,
-        "gold": 0
-      },
-      "check": "fast_complete",
-      "checkFunc": "fast_complete",
-      "progress": 0,
-      "completed": false
-    },
-    {
-      "id": "survivor",
-      "name": "🛡️ Survivor",
-      "desc": "Don't take any damage today",
-      "target": 1,
-      "reward": {
-        "xp": 0,
-        "gold": 20
-      },
-      "check": "no_damage",
-      "checkFunc": "no_damage",
-      "progress": 0,
-      "completed": false
-    },
-    {
-      "id": "synergist",
-      "name": "🔗 Synergist",
-      "desc": "Complete quest with Primary + Secondary skill",
+      "id": "zero_inbox",
+      "name": "🧘 Zero Inbox",
+      "desc": "Process all files in 'Scraps'",
       "target": 1,
       "reward": {
         "xp": 0,
         "gold": 10
       },
-      "check": "synergy",
-      "checkFunc": "synergy",
+      "check": "zero_inbox",
+      "checkFunc": "zero_inbox",
+      "progress": 0,
+      "completed": false
+    },
+    {
+      "id": "morning_win",
+      "name": "☀️ Morning Win",
+      "desc": "Complete 1 Trivial quest before 10 AM",
+      "target": 1,
+      "reward": {
+        "xp": 0,
+        "gold": 15
+      },
+      "check": "morning_trivial",
+      "checkFunc": "morning_trivial",
+      "progress": 0,
+      "completed": false
+    },
+    {
+      "id": "high_stakes",
+      "name": "💪 High Stakes",
+      "desc": "Complete 1 High Stakes quest",
+      "target": 1,
+      "reward": {
+        "xp": 0,
+        "gold": 30
+      },
+      "check": "high_stakes",
+      "checkFunc": "high_stakes",
       "progress": 0,
       "completed": false
     }

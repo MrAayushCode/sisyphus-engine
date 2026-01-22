@@ -2,81 +2,79 @@
 
 > **"One must imagine Sisyphus happy. But Sisyphus must also get to work."**
 
-![Version](https://img.shields.io/badge/version-1.0.0--beta-blueviolet?style=for-the-badge) ![Platform](https://img.shields.io/badge/platform-Obsidian-black?style=for-the-badge) ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-2.0.0-blueviolet?style=for-the-badge) ![Platform](https://img.shields.io/badge/platform-Obsidian-black?style=for-the-badge) ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 
 **Sisyphus Engine** is a high-stakes gamification OS for Obsidian. It replaces your todo list with a roguelike RPG system where productivity dictates survival. 
 
 **Core Rule:** If your HP hits 0, the run ends. Your level, gold, and progress are wiped. You keep only your "Scars."
 
-## 📋 Command & Control Index
+---
+
+## 📋 Table of Contents
 
 1. [Installation & Setup](#1-installation--setup)
-2. [The Panopticon (Interface)](#2-the-panopticon-interface)
+2. [The Panopticon (HUD)](#2-the-panopticon-hud)
 3. [Core Gameplay Loop](#3-core-gameplay-loop)
-    - [Chaos & Entropy](#chaos--entropy)
-    - [Daily Missions](#daily-missions)
-4. [Economy & The Black Market](#4-economy--the-black-market)
-5. [Neural Hub (Skill Tree)](#5-neural-hub-skill-tree)
-6. [DLC 1: Combat Librarian (Research)](#6-dlc-1-combat-librarian-research)
-7. [DLC 2: Meditation & Lockdown](#7-dlc-2-meditation--lockdown)
-8. [DLC 3: Quest Chains](#8-dlc-3-quest-chains)
-9. [DLC 4: Analytics & Endgame](#9-dlc-4-analytics--endgame)
-10. [Full Command Reference](#10-full-command-reference)
-11. [Troubleshooting](#11-troubleshooting)
+4. [New Features (v2.0)](#4-new-features-v20)
+5. [DLC 1: Daily Missions & Scraps](#5-dlc-1-daily-missions--scraps)
+6. [DLC 2: Combat Librarian (Research)](#6-dlc-2-combat-librarian-research)
+7. [DLC 3: Meditation & Recovery](#7-dlc-3-meditation--recovery)
+8. [DLC 4: Quest Chains](#8-dlc-4-quest-chains)
+9. [DLC 5: Neural Hub (Skill Graph)](#9-dlc-5-neural-hub-skill-graph)
+10. [DLC 6: Analytics & Endgame](#10-dlc-6-analytics--endgame)
+11. [Full Command Reference](#11-full-command-reference)
 
 ---
 
 ## <a id="1-installation--setup"></a>1. Installation & Setup
 
-### **Manual Installation**
-The Sisyphus Engine is a complex system composed of multiple sub-engines.
+### **Prerequisites**
+* Obsidian v1.0.0 or higher.
+* **Recommendation:** Use a fresh vault or a dedicated folder for your first run.
 
-1. **Clone/Download:** Get the source code from the repository.
-2. **Build:** Run `npm install` followed by `npm run build` to compile the TypeScript engines.
-3. **Deploy:** Move the following files to `.obsidian/plugins/sisyphus-engine/`:
-    - `main.js` (The compiled engine)
-    - `styles.css` (Critical for the HUD/Panopticon)
-    - `manifest.json`
-4. **Activate:** Enable **Sisyphus Engine** in Obsidian's Community Plugins settings.
-5. **Initialize:** Run the command `Open Panopticon` to boot the HUD.
+### **Manual Installation**
+Since Sisyphus is an engine, it requires manual placement of the compiled files.
+
+1.  **Locate your Plugin Folder:**
+    * **Windows:** `\Path\To\Vault\.obsidian\plugins\sisyphus-engine\`
+    * **Mac:** `~/Library/Application Support/obsidian/Vault/.obsidian/plugins/sisyphus-engine/`
+    * **Linux:** `~/.config/obsidian/Vault/.obsidian/plugins/sisyphus-engine/`
+2.  **Deploy Files:** Place `main.js`, `styles.css`, and `manifest.json` into this folder.
+3.  **Activate:** Open Obsidian Settings > Community Plugins > Enable **Sisyphus Engine**.
+4.  **Initialize:** Press `Ctrl/Cmd + P` and run `Sisyphus: Open Panopticon`.
 
 ---
 
-## <a id="2-the-panopticon-interface"></a>2. The Panopticon (Interface)
+## <a id="2-the-panopticon-hud"></a>2. The Panopticon (HUD)
 
-**Source:** `view.ts`
-
-The Panopticon is your persistent Heads-Up Display (HUD) in the right sidebar. It monitors active threats and vitals.
+The **Panopticon** is your persistent Heads-Up Display in the right sidebar. It monitors active threats and vitals.
 
 * **Vitals Grid:**
-    * **HP:** Health Points. Reaches 0 = Permadeath.
-    * **Gold:** Currency. Negative Gold (Debt) doubles all incoming damage.
-    * **Rival Dmg:** The current punishment value for failure. Scales with Level.
-* **The Oracle:** An algorithmic prediction of your survival (in days) based on current burn rate.
-* **Status Lights:**
-    * **LOCKDOWN:** Active if you take >50 damage in one day.
-    * **REST DAY:** Active if you purchased a Rest Day permit.
-    * **DEBT:** Active if Gold < 0.
-* **Quick Capture:** Input field at the bottom. Type a task and press Enter. 
+    * **HP:** Health Points. 0 = Permadeath.
+    * **Gold:** Currency. **Negative Gold (Debt) doubles all incoming damage.**
+    * **Rival Dmg:** Current punishment value. Scales with Level.
+* **Status Sirens (v2.0):**
+    * **LOCKDOWN:** Active if you take >50 damage in one session.
+    * **DEBT CRISIS:** Pulsing red alert when Gold < 0.
+* **The Oracle:** An algorithmic prediction of your survival (in days).
+* **Quick Capture:** Input field at the bottom.
     * *Syntax:* `Task Name /1` (Difficulty 1) through `Task Name /5` (Difficulty 5).
 
 ---
 
 ## <a id="3-core-gameplay-loop"></a>3. Core Gameplay Loop
 
-**Source:** `engine.ts`
-
 You do not simply "add tasks." You **Deploy Quests**.
 
 * **Deploying:** Quests have Difficulty (1-5) and Priority.
     * **Difficulty 1 (Trivial):** Low Risk, Low Reward.
     * **Difficulty 5 (SUICIDE):** High Risk, Massive Reward.
-    * **High Stakes:** Toggleable. Doubles Gold reward but also doubles Damage on failure.
+    * **High Stakes:** Doubles Gold reward but also doubles Damage on failure.
 * **Execution:** Completion grants XP and Gold. Failure deals Damage (`Rival Dmg`).
-* **Leveling:** Earning XP increases Level. Leveling up heals you but **increases Rival Damage**. The game gets harder the longer you survive.
+* **Leveling:** Leveling up heals you but **increases Rival Damage**. The game gets harder the longer you survive.
 
-### <a id="chaos--entropy"></a>Chaos & Entropy
-Every day you log in, the Engine rolls a **Daily Modifier**:
+### **Chaos & Entropy**
+Every day, the Engine rolls a **Daily Modifier**:
 
 | Modifier | Effect | Icon |
 | :--- | :--- | :--- |
@@ -88,63 +86,46 @@ Every day you log in, the Engine rolls a **Daily Modifier**:
 | **Rival Sabotage** | Gold gain halved (0.5x). | 🕵️ |
 | **Adrenaline** | 2x XP, but -5 HP per quest completed. | 💉 |
 
-### <a id="daily-missions"></a>Daily Missions
-3 random objectives are assigned daily. Completing them grants bonus resources.
-* *Examples:* **Morning Win** (Complete trivial quest before 10AM), **Speed Demon** (Complete within 2h), **Survivor** (No damage taken).
+---
+
+## <a id="4-new-features-v20"></a>4. New Features (v2.0)
+
+* **Performance:** The engine now uses **Debounced Typing**, allowing for lag-free writing in large vaults.
+* **Mobile Optimized:** The HUD now creates a responsive single-column layout on phones.
+* **Real Research Files:** Research quests now generate actual Markdown files in `Active_Run/Research/`.
+* **Boss Rituals:** Boss spawns now feature a heartbeat audio cue and a 3-second delay for dramatic effect.
+* **Victory Screen:** Reaching Level 50 now triggers an Ascension Modal with lifetime stats.
 
 ---
 
-## <a id="4-economy--the-black-market"></a>4. Economy & The Black Market
+## <a id="5-dlc-1-daily-missions--scraps"></a>5. DLC 1: Daily Missions & Scraps
 
-**Source:** `modals.ts`
+3 random objectives are assigned daily.
 
-Gold is survival. You earn it by completing quests. You spend it in the **Shop**.
+**The "Zero Inbox" Loop:**
+One possible mission is **Zero Inbox**. To complete it, you must process your "Scraps".
 
-| Item | Cost | Effect |
-| :--- | :--- | :--- |
-| **Stimpack** | 50g | Heals 20 HP. |
-| **Sabotage** | 200g | Permanently lowers Rival Damage by 5. |
-| **Shield** | 150g | Prevents damage for 24 hours. |
-| **Rest Day** | 100g | Pauses "Rust" accumulation and prevents damage for 24 hours. |
-
-**Debt Mechanics:** If you go into negative gold, the "Debt" status light triggers. While in debt, **all damage taken is doubled**.
+1.  **Capture:** Use `Ctrl/Cmd + P` -> `Quick Capture (Scrap)` to dump thoughts instantly into the `Scraps/` folder.
+2.  **Process:** Clean out the `Scraps/` folder (delete or move files).
+3.  **Reward:** The mission marks itself complete once the folder is empty.
 
 ---
 
-## <a id="5-neural-hub-skill-tree"></a>5. Neural Hub (Skill Tree)
-
-**Source:** `types.ts`
-
-Sisyphus tracks your skills (e.g., "Coding", "Writing").
-
-* **Leveling Nodes:** Assign skills to quests. Completing the quest grants XP to that specific node.
-* **Synergy:** Assign a "Secondary Skill" to a quest to create a Neural Link.
-* **Rust:** If a skill is not used for **3 days**, it gains "Rust".
-    * *Effect:* XP requirement for the next level increases by 10% per stack.
-    * *Fix:* Use the skill to clear Rust, or buy a manual polish in the skill menu.
-
----
-
-## <a id="6-dlc-1-combat-librarian-research"></a>6. DLC 1: Combat Librarian (Research)
-
-**Source:** `ResearchEngine.ts`
+## <a id="6-dlc-2-combat-librarian-research"></a>6. DLC 2: Combat Librarian (Research)
 
 The Engine prevents you from writing unless you have "earned" it.
 
-* **The Ratio:** You must complete **2 Combat Quests** (standard tasks) to unlock **1 Research Quest** (writing/study).
+* **The Ratio:** You must complete **2 Combat Quests** (standard tasks) to unlock **1 Research Quest** (writing/study). *Note: The first research quest of a run is free.*
 * **Word Count Jail:**
     * **Survey:** Target 200 words.
     * **Deep Dive:** Target 400 words.
 * **Validation:**
     * **< 80%:** Cannot complete. (Too short).
-    * **100% - 125%:** Optimal.
     * **> 125%:** **Gold Tax applied.** (You are rambling).
 
 ---
 
-## <a id="7-dlc-2-meditation--lockdown"></a>7. DLC 2: Meditation & Lockdown
-
-**Source:** `MeditationEngine.ts`
+## <a id="7-dlc-3-meditation--recovery"></a>7. DLC 3: Meditation & Recovery
 
 * **Lockdown:** If you take >50 Damage in a single day, the system triggers LOCKDOWN.
     * *Effect:* You cannot deploy new quests for 6 hours.
@@ -155,32 +136,35 @@ The Engine prevents you from writing unless you have "earned" it.
 
 ---
 
-## <a id="8-dlc-3-quest-chains"></a>8. DLC 3: Quest Chains
-
-**Source:** `ChainsEngine.ts`
+## <a id="8-dlc-4-quest-chains"></a>8. DLC 4: Quest Chains
 
 Create linear dependencies between tasks.
 
 * **Builder:** Select multiple active quests to link them.
 * **Locking:** You cannot complete step 2 before step 1.
 * **Momentum:** Completing a full chain grants a massive XP bonus.
-* **Breaking:** You can break a chain to access locked quests, but you forfeit the chain completion bonus.
 
 ---
 
-## <a id="9-dlc-4-analytics--endgame"></a>9. DLC 4: Analytics & Endgame
+## <a id="9-dlc-5-neural-hub-skill-graph"></a>9. DLC 5: Neural Hub (Skill Graph)
 
-**Source:** `AnalyticsEngine.ts`
+Sisyphus tracks your skills (e.g., "Coding", "Writing") and visualizes them as a brain.
+
+* **Visual Graph:** Run `Neural Hub: Generate Skill Graph` to create a `.canvas` file showing your skills as nodes in a neural network.
+* **Synergy:** Completing a quest with a Secondary Skill draws a permanent connection line between the two skills on the graph.
+* **Rust:** If a skill is not used for **3 days**, it turns **RED** on the graph. Use it to polish it.
+
+---
+
+## <a id="10-dlc-6-analytics--endgame"></a>10. DLC 6: Analytics & Endgame
 
 * **Reports:** Generate Weekly Reports to see success rates, gold earned, and top skills.
 * **Boss Milestones:** At Levels 10, 20, 30, 40, and 50, special Boss Quests appear automatically.
-    * *Example:* **The Gatekeeper (Lvl 10)**.
-    * These quests have high difficulty and cannot be deleted (they respawn).
-* **Win Condition:** Defeating the Level 50 Boss ("Sisyphus Prime").
+* **Win Condition:** Defeating the Level 50 Boss ("Sisyphus Prime") triggers the Victory Modal and logs the run in your Legacy history.
 
 ---
 
-## <a id="10-full-command-reference"></a>10. Full Command Reference
+## <a id="11-full-command-reference"></a>11. Full Command Reference
 
 Access these via the Command Palette (`Ctrl/Cmd + P`).
 
@@ -191,6 +175,7 @@ Access these via the Command Palette (`Ctrl/Cmd + P`).
 | `Toggle Focus Noise` | Turns Brown Noise audio On/Off. |
 | `ACCEPT DEATH` | **HARD RESET.** Wipes save data. Resets Lvl to 1. |
 | `Reroll Chaos` | Debug: Forces a new Daily Modifier roll. |
+| `Quick Capture (Scrap)` | Instantly create a note in the `Scraps/` folder. |
 
 ### **Quest Management**
 | Command | Description |
@@ -208,24 +193,10 @@ Access these via the Command Palette (`Ctrl/Cmd + P`).
 | `Filters: Show High/Medium/Low Energy` | Filter the Quest list by energy tag. |
 | `Filters: Clear All Filters` | Reset view to show all quests. |
 
-### **Analytics**
+### **Analytics & Skills**
 | Command | Description |
 | :--- | :--- |
 | `Analytics: Generate Weekly Report` | Show summary of the week's performance. |
 | `Analytics: View Game Stats` | View current Streak, Total Quests, etc. |
 | `Endgame: Check Boss Milestones` | Force check for Boss Spawns. |
-
----
-
-## <a id="11-troubleshooting"></a>11. Troubleshooting
-
-* **"I can't create quests."**
-    * Check if the HUD says **LOCKDOWN**. If so, you must meditate or wait.
-    * Check if you have negative Gold (Debt).
-* **"The Audio isn't working."**
-    * Obsidian sometimes blocks audio contexts until user interaction. Click anywhere inside the Panopticon HUD to initialize the audio engine.
-* **"My Skill keeps rusting."**
-    * Skills rust after 3 days of disuse. You must complete a quest linked to that skill to polish it.
-* **"I can't delete a Boss Quest."**
-    * This is intentional. Bosses (Level 10+) respawn if deleted. You must defeat them.
-
+| `Neural Hub: Generate Skill Graph` | Create an Obsidian Canvas of your skill tree. |
