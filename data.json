@@ -19,27 +19,27 @@
       "deadline": "+12h"
     }
   ],
-  "comboCount": 2,
-  "lastCompletionTime": 1769180677371,
+  "comboCount": 0,
+  "lastCompletionTime": 0,
   "activeBuffs": [],
   "hp": 105,
   "maxHp": 105,
-  "xp": 42,
-  "gold": 90,
+  "xp": 0,
+  "gold": 0,
   "xpReq": 100,
   "level": 1,
   "rivalDmg": 10,
-  "lastLogin": "2026-01-23",
+  "lastLogin": "2026-01-25",
   "shieldedUntil": "",
   "restDayUntil": "",
   "skills": [],
   "dailyModifier": {
-    "name": "Inflation",
-    "desc": "Prices 2x.",
+    "name": "Rival Sabotage",
+    "desc": "Gold 0.5x.",
     "xpMult": 1,
-    "goldMult": 1,
-    "priceMult": 2,
-    "icon": "📈"
+    "goldMult": 0.5,
+    "priceMult": 1,
+    "icon": "🕵️"
   },
   "legacy": {
     "souls": 0,
@@ -58,20 +58,6 @@
   "damageTakenToday": 0,
   "dailyMissions": [
     {
-      "id": "zero_inbox",
-      "name": "🧘 Zero Inbox",
-      "desc": "Process all files in 'Scraps'",
-      "target": 1,
-      "reward": {
-        "xp": 0,
-        "gold": 10
-      },
-      "check": "zero_inbox",
-      "checkFunc": "zero_inbox",
-      "progress": 1,
-      "completed": true
-    },
-    {
       "id": "synergist",
       "name": "🔗 Synergist",
       "desc": "Complete quest with Primary + Secondary skill",
@@ -86,27 +72,41 @@
       "completed": false
     },
     {
-      "id": "momentum",
-      "name": "🔥 Momentum",
-      "desc": "Complete 3 quests today",
+      "id": "specialist",
+      "name": "🎯 Specialist",
+      "desc": "Use the same skill 3 times",
       "target": 3,
       "reward": {
-        "xp": 20,
+        "xp": 15,
         "gold": 0
       },
-      "check": "quest_count",
-      "checkFunc": "quest_count",
-      "progress": 2,
+      "check": "skill_repeat",
+      "checkFunc": "skill_repeat",
+      "progress": 0,
+      "completed": false
+    },
+    {
+      "id": "zero_inbox",
+      "name": "🧘 Zero Inbox",
+      "desc": "Process all files in 'Scraps'",
+      "target": 1,
+      "reward": {
+        "xp": 0,
+        "gold": 10
+      },
+      "check": "zero_inbox",
+      "checkFunc": "zero_inbox",
+      "progress": 0,
       "completed": false
     }
   ],
-  "dailyMissionDate": "2026-01-23",
-  "questsCompletedToday": 2,
+  "dailyMissionDate": "2026-01-25",
+  "questsCompletedToday": 0,
   "skillUsesToday": {},
   "researchQuests": [],
   "researchStats": {
     "totalResearch": 0,
-    "totalCombat": 2,
+    "totalCombat": 0,
     "researchCompleted": 0,
     "combatCompleted": 0
   },
@@ -126,97 +126,14 @@
     "activeContext": "any",
     "activeTags": []
   },
-  "dayMetrics": [
-    {
-      "date": "2026-01-23",
-      "questsCompleted": 2,
-      "questsFailed": 0,
-      "xpEarned": 0,
-      "goldEarned": 0,
-      "damagesTaken": 0,
-      "skillsLeveled": [],
-      "chainsCompleted": 0
-    }
-  ],
+  "dayMetrics": [],
   "weeklyReports": [],
   "bossMilestones": [],
   "streak": {
-    "current": 1,
-    "longest": 1,
-    "lastDate": "2026-01-23"
+    "current": 0,
+    "longest": 0,
+    "lastDate": ""
   },
-  "achievements": [
-    {
-      "id": "first_blood",
-      "name": "First Blood",
-      "description": "Complete your first quest.",
-      "rarity": "common",
-      "unlocked": true,
-      "unlockedAt": "2026-01-23T15:04:30.292Z"
-    },
-    {
-      "id": "week_warrior",
-      "name": "Week Warrior",
-      "description": "Maintain a 7-day streak.",
-      "rarity": "common",
-      "unlocked": false
-    },
-    {
-      "id": "warm_up",
-      "name": "Warm Up",
-      "description": "Complete 10 total quests.",
-      "rarity": "common",
-      "unlocked": false
-    },
-    {
-      "id": "skill_adept",
-      "name": "Apprentice",
-      "description": "Reach Level 5 in any skill.",
-      "rarity": "rare",
-      "unlocked": false
-    },
-    {
-      "id": "chain_gang",
-      "name": "Chain Gang",
-      "description": "Complete a Quest Chain.",
-      "rarity": "rare",
-      "unlocked": false
-    },
-    {
-      "id": "researcher",
-      "name": "Scholar",
-      "description": "Complete 5 Research Quests.",
-      "rarity": "rare",
-      "unlocked": false
-    },
-    {
-      "id": "rich",
-      "name": "Capitalist",
-      "description": "Hold 500 gold at once.",
-      "rarity": "rare",
-      "unlocked": false
-    },
-    {
-      "id": "boss_slayer",
-      "name": "Giant Slayer",
-      "description": "Defeat your first Boss.",
-      "rarity": "epic",
-      "unlocked": false
-    },
-    {
-      "id": "ascended",
-      "name": "Sisyphus Happy",
-      "description": "Reach Level 50.",
-      "rarity": "legendary",
-      "unlocked": false
-    },
-    {
-      "id": "immortal",
-      "name": "Immortal",
-      "description": "Reach Level 20 with 0 Deaths.",
-      "rarity": "legendary",
-      "unlocked": false
-    }
-  ],
+  "achievements": [],
   "gameWon": false
 }
